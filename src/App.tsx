@@ -17,7 +17,7 @@ import routerBindings, {
   NavigateToResource,
   UnsavedChangesNotifier,
 } from '@refinedev/react-router-v6'
-import dataProvider from '@refinedev/simple-rest'
+import { dataProvider } from './rest-data-provider'
 import { BrowserRouter, Outlet, Route, Routes } from 'react-router-dom'
 import { Header } from './components/header'
 import { BlogPostCreate, BlogPostEdit, BlogPostList, BlogPostShow } from './pages/blog-posts'
