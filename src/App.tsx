@@ -24,6 +24,7 @@ import { BlogPostCreate, BlogPostEdit, BlogPostList, BlogPostShow } from './page
 import { CategoryCreate, CategoryEdit, CategoryList, CategoryShow } from './pages/categories'
 import { UserCreate, UserEdit, UserList, UserShow } from './pages/users'
 import { ArticleCreate, ArticleEdit, ArticleList, ArticleShow } from './pages/articles'
+import { accessControlProvider } from './access_control_provider'
 
 function App() {
   const [colorScheme, setColorScheme] = useLocalStorage<ColorScheme>({
@@ -56,6 +57,7 @@ function App() {
                   dataProvider={dataProvider('http://localhost:3000')}
                   notificationProvider={notificationProvider}
                   routerProvider={routerBindings}
+                  accessControlProvider={accessControlProvider}
                   resources={[
                     {
                       name: 'users',
