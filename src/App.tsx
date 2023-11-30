@@ -1,4 +1,4 @@
-import { GitHubBanner, Refine } from '@refinedev/core'
+import { AuthBindings, GitHubBanner, Refine } from '@refinedev/core'
 import { DevtoolsPanel, DevtoolsProvider } from '@refinedev/devtools'
 import { RefineKbar, RefineKbarProvider } from '@refinedev/kbar'
 
@@ -25,6 +25,9 @@ import { CategoryCreate, CategoryEdit, CategoryList, CategoryShow } from './page
 import { UserCreate, UserEdit, UserList, UserShow } from './pages/users'
 import { ArticleCreate, ArticleEdit, ArticleList, ArticleShow } from './pages/articles'
 import { accessControlProvider } from './access_control_provider'
+import { Login } from './pages/login'
+import axios from 'axios'
+import { useAuth0 } from '@auth0/auth0-react'
 
 function App() {
   const [colorScheme, setColorScheme] = useLocalStorage<ColorScheme>({
@@ -35,6 +38,80 @@ function App() {
 
   const toggleColorScheme = (value?: ColorScheme) =>
     setColorScheme(value || (colorScheme === 'dark' ? 'light' : 'dark'))
+
+  const { isLoading, isAuthenticated, user, logout, getIdTokenClaims } = useAuth0()
+
+  if (isLoading) {
+    return <span>loading...</span>
+  }
+
+  const authProvider: AuthBindings = {
+    login: async () => {
+      return {
+        success: true,
+      }
+    },
+    logout: async () => {
+      logout({ logoutParams: { returnTo: window.location.origin } })
+      return {
+        success: true,
+      }
+    },
+    onError: async (error) => {
+      console.error(error)
+      return { error }
+    },
+    check: async () => {
+      try {
+        const token = await getIdTokenClaims()
+        console.log(token)
+        if (token) {
+          axios.defaults.headers.common = {
+            Authorization: `Bearer ${token.__raw}`,
+          }
+          return {
+            authenticated: true,
+          }
+        } else {
+          return {
+            authenticated: false,
+            error: {
+              message: 'Check failed',
+              name: 'Token not found',
+            },
+            redirectTo: '/login',
+            logout: true,
+          }
+        }
+      } catch (error: any) {
+        return {
+          authenticated: false,
+          error: new Error(error),
+          redirectTo: '/login',
+          logout: true,
+        }
+      }
+    },
+    getPermissions: async () => null,
+    getIdentity: async () => {
+      if (user) {
+        return {
+          ...user,
+          avatar: user.picture,
+        }
+      }
+      return null
+    },
+  }
+
+  getIdTokenClaims().then((token) => {
+    console.log(token)
+    if (token) {
+      axios.defaults.headers.common = {
+        Authorization: `Bearer ${token.__raw}`,
+      }
+    }
+  })
 
   return (
     <BrowserRouter>
@@ -55,6 +132,7 @@ function App() {
                   //   "https://api.fake-rest.refine.dev"
                   // )}
                   dataProvider={dataProvider('http://localhost:3000')}
+                  authProvider={authProvider}
                   notificationProvider={notificationProvider}
                   routerProvider={routerBindings}
                   accessControlProvider={accessControlProvider}
@@ -141,6 +219,9 @@ function App() {
                         <Route path="show/:id" element={<CategoryShow />} />
                       </Route> */}
                       <Route path='*' element={<ErrorComponent />} />
+                    </Route>
+                    <Route>
+                      <Route path='/login' element={<Login />}></Route>
                     </Route>
                   </Routes>
 

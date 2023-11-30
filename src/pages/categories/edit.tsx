@@ -21,7 +21,7 @@ export const CategoryEdit: React.FC<IResourceComponentsProps> = () => {
   })
 
   const categoriesData = queryResult?.data?.data
-  console.log(categoriesData)
+  // console.log(categoriesData)
 
   return (
     <Edit saveButtonProps={saveButtonProps}>
